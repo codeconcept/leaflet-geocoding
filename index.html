@@ -1,0 +1,104 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Geocoding control</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+
+    <!-- Load Leaflet from CDN -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+      integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+      integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+      crossorigin=""
+    ></script>
+
+    <!-- Load Esri Leaflet from CDN -->
+    <script
+      src="https://unpkg.com/esri-leaflet@2.3.3/dist/esri-leaflet.js"
+      integrity="sha512-cMQ5e58BDuu1pr9BQ/eGRn6HaR6Olh0ofcHFWe5XesdCITVuSBiBZZbhCijBe5ya238f/zMMRYIMIIg1jxv4sQ=="
+      crossorigin=""
+    ></script>
+
+    <!-- Load Esri Leaflet Geocoder from CDN -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/esri-leaflet-geocoder@2.3.2/dist/esri-leaflet-geocoder.css"
+      integrity="sha512-IM3Hs+feyi40yZhDH6kV8vQMg4Fh20s9OzInIIAc4nx7aMYMfo+IenRUekoYsHZqGkREUgx0VvlEsgm7nCDW9g=="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/esri-leaflet-geocoder@2.3.2/dist/esri-leaflet-geocoder.js"
+      integrity="sha512-8twnXcrOGP3WfMvjB0jS5pNigFuIWj4ALwWEgxhZ+mxvjF5/FBPVd5uAxqT8dd2kUmTVK9+yQJ4CmTmSg/sXAQ=="
+      crossorigin=""
+    ></script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script>
+      // https://esri.github.io/esri-leaflet/examples/geocoding-control.html
+
+      const map = L.map("map").setView([48.117266, -1.6777926], 7);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      const searchControl = L.esri.Geocoding.geosearch().addTo(map);
+
+      const results = L.layerGroup().addTo(map);
+
+      let markers = [];
+
+      searchControl.on("results", function(data) {
+        markers = [];
+        console.log("data", data);
+        results.clearLayers();
+        // several results as several towns with same name (like)
+        for (var i = data.results.length - 1; i >= 0; i--) {
+          const result = data.results[i];
+          const marker = L.marker(result.latlng);
+          markers = [...markers, L.marker(marker)];
+          results.addLayer(marker);
+          marker.on("click", addRadius);
+          console.log("markers", markers);
+        }
+      });
+
+      function addRadius(marker, radius = 1000) {
+        console.log("marker clicked", marker);
+        const circle = L.circle([marker.latlng.lat, marker.latlng.lng], {
+          radius
+        });
+        console.log("circle", circle);
+        circle.addTo(map);
+        setTimeout(() => {
+          map.setZoom(14);
+        }, 1500);
+      }
+    </script>
+  </body>
+</html>
