@@ -56,15 +56,33 @@
   </head>
   <body>
     <div id="map"></div>
-
     <script>
       // https://esri.github.io/esri-leaflet/examples/geocoding-control.html
 
-      const map = L.map("map").setView([48.117266, -1.6777926], 7);
+      const coordsParis = { lat: 48.866667, lng: 2.333333 };
+      let coordsFromBrowser = { lat: coordsParis.lat, lng: coordsParis.lng };
+
+      navigator.geolocation.getCurrentPosition(function (position) {
+        console.log(
+          "position",
+          position.coords.latitude,
+          position.coords.longitude
+        );
+
+        coordsFromBrowser.lat = position.coords.latitude;
+        coordsFromBrowser.lng = position.coords.longitude;
+
+        map.setView([coordsFromBrowser.lat, coordsFromBrowser.lng], 15);
+      });
+
+      const map = L.map("map").setView(
+        [coordsFromBrowser.lat, coordsFromBrowser.lng],
+        7
+      );
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
-          '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+          '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
       const searchControl = L.esri.Geocoding.geosearch().addTo(map);
@@ -73,7 +91,7 @@
 
       let markers = [];
 
-      searchControl.on("results", function(data) {
+      searchControl.on("results", function (data) {
         markers = [];
         console.log("data", data);
         results.clearLayers();
@@ -91,13 +109,13 @@
       function addRadius(marker, radius = 1000) {
         console.log("marker clicked", marker);
         const circle = L.circle([marker.latlng.lat, marker.latlng.lng], {
-          radius
+          radius,
         });
         console.log("circle", circle);
         circle.addTo(map);
         setTimeout(() => {
-          map.setZoom(14);
-        }, 1500);
+          map.setZoom(15);
+        }, 1000);
       }
     </script>
   </body>
